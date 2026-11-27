@@ -7,7 +7,7 @@ import { formatInstant } from "@/lib/dates";
 import { Card } from "@/components/ui/misc";
 import { ProfileForm, SignOutEverywhere } from "./profile-forms";
 
-// mon code 03
+// mon code 04
 export const metadata = { title: "Mon profil" };
 
 function device(ua: string | null) {
