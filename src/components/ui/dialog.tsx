@@ -70,7 +70,7 @@ export function ConfirmDialog({
         </button>
         <button
           autoFocus
-          className={cn("h-10 rounded-lg px-4 text-sm font-medium text-white", danger ? "bg-danger" : "bg-primary text-primary-fg")}
+          className={cn("h-10 rounded-lg px-4 text-sm font-medium", danger ? "bg-danger text-danger-fg" : "bg-primary text-primary-fg")}
           onClick={() => {
             onConfirm();
             onOpenChange(false);

@@ -2,7 +2,7 @@
 import { useSyncedState } from "@/lib/hooks/use-synced-state";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useTransition } from "react";
+import { useCallback, useEffect, useRef, useTransition } from "react";
 import { toast } from "sonner";
 import { Columns3, Globe, List, Lock, Plus, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ import type { LabelView } from "@/server/tasks";
 import { joinProjectAction, setProjectArchivedAction, updateProjectAction } from "@/app/actions/projects";
 import { TaskPanel } from "@/components/task/task-panel";
 import { useBoard, type BoardData } from "./use-board";
-import { ListView } from "./list-view";
+import { ListView, QUICK_ADD_EVENT } from "./list-view";
 import { BoardView } from "./board-view";
 
 export function ProjectView({ initial, labels, isExternal }: { initial: BoardData; labels: LabelView[]; isExternal: boolean }) {
@@ -45,15 +45,11 @@ export function ProjectView({ initial, labels, isExternal }: { initial: BoardDat
     if (id) requestAnimationFrame(() => document.querySelector<HTMLElement>(`[data-task-row="${id}"],[data-board-card="${id}"]`)?.focus());
   }, [setParams, openId]);
 
+  const scrollRef = useRef<HTMLDivElement>(null);
   /** Place le curseur dans l'ajout rapide de la première section (vue Liste). */
   const focusQuickAdd = useCallback(() => {
     if (view === "tableau") setParams({ vue: null });
-    const tryFocus = (n: number) => {
-      const el = document.getElementById("quick-add-first");
-      if (el) el.focus();
-      else if (n > 0) setTimeout(() => tryFocus(n - 1), 50);
-    };
-    tryFocus(10);
+    setTimeout(() => window.dispatchEvent(new Event(QUICK_ADD_EVENT)), view === "tableau" ? 150 : 0);
   }, [view, setParams]);
 
   useEffect(() => {
@@ -84,6 +80,7 @@ export function ProjectView({ initial, labels, isExternal }: { initial: BoardDat
     <div className="flex h-full flex-col">
       <header className="border-b border-border bg-surface px-4 pt-4 sm:px-6">
         <div className="flex flex-wrap items-center gap-3">
+          <div className="flex w-full min-w-0 items-center gap-3 sm:w-auto sm:flex-1">
           <span className="h-4 w-4 shrink-0 rounded" style={{ background: project.color }} aria-hidden />
           {canRename ? (
             <input
@@ -108,6 +105,7 @@ export function ProjectView({ initial, labels, isExternal }: { initial: BoardDat
           ) : (
             <h1 className="min-w-0 flex-1 truncate text-xl font-semibold sm:text-2xl">{project.name}</h1>
           )}
+          </div>
           {canRename && <h1 className="sr-only">{project.name}</h1>}
           <span className="inline-flex items-center gap-1 rounded-full bg-surface-2 px-2 py-0.5 text-xs text-muted">
             {project.visibility === "private" ? <Lock size={12} aria-hidden /> : <Globe size={12} aria-hidden />}
@@ -198,7 +196,7 @@ export function ProjectView({ initial, labels, isExternal }: { initial: BoardDat
         </div>
       )}
 
-      <div className={cn("min-h-0 flex-1 overflow-auto p-4 sm:p-6", openId && "sm:pr-[500px] lg:pr-[580px]")}>
+      <div ref={scrollRef} className={cn("min-h-0 flex-1 overflow-auto p-4 sm:p-6", openId && "sm:pr-[500px] lg:pr-[580px]")}>
         {tasks.length === 0 && !project.canEdit ? (
           <EmptyState title="Aucune tâche pour l'instant">Les contributeurs de ce projet n&apos;ont pas encore créé de tâche.</EmptyState>
         ) : (
@@ -211,7 +209,7 @@ export function ProjectView({ initial, labels, isExternal }: { initial: BoardDat
             {view === "tableau" ? (
               <BoardView board={board} canEdit={project.canEdit} selectedId={openId} onOpen={openTask} />
             ) : (
-              <ListView board={board} canEdit={project.canEdit} selectedId={openId} onOpen={openTask} />
+              <ListView board={board} canEdit={project.canEdit} selectedId={openId} onOpen={openTask} scrollRef={scrollRef} />
             )}
           </>
         )}

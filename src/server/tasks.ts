@@ -145,7 +145,9 @@ async function writeEvent(
   await tx.insert(taskEvents).values({ organizationId: actor.organizationId, taskId, projectId, actorId: actor.id, type, changes, meta });
 }
 
-export async function createTask(actor: Actor, input: CreateTaskInput): Promise<{ id: string; sectionId: string | null; sortKey: string; version: number }> {
+export async function createTask(actor: Actor, raw: CreateTaskInput): Promise<{ id: string; sectionId: string | null; sortKey: string; version: number }> {
+  const input = { ...raw, title: raw.title.trim() };
+  if (!input.title) throw invalid("Le titre est obligatoire.");
   if (input.parentTaskId) return createSubtask(actor, input);
   const access = await requireProjectEdit(actor, input.projectId);
   const projectId = access.project.id;
@@ -225,7 +227,9 @@ async function createSubtask(actor: Actor, input: CreateTaskInput) {
 
 const EVENT_FIELDS = ["title", "description", "assigneeId", "priority", "status", "startDate", "dueDate"] as const;
 
-export async function updateTask(actor: Actor, taskId: string, version: number, patch: UpdateTaskInput): Promise<{ version: number }> {
+export async function updateTask(actor: Actor, taskId: string, version: number, rawPatch: UpdateTaskInput): Promise<{ version: number }> {
+  const patch = rawPatch.title === undefined ? rawPatch : { ...rawPatch, title: rawPatch.title.trim() };
+  if (patch.title === "") throw invalid("Le titre est obligatoire.");
   const { task, access } = await requireTaskEdit(actor, taskId);
   const projectId = access.project.id;
   if (patch.assigneeId) await assertAssignable(projectId, patch.assigneeId);

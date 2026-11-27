@@ -123,9 +123,27 @@ test("7-8. Mes tâches puis déplacement dans le tableau (persisté)", async ({ 
   await page.waitForTimeout(800);
   await page.reload();
   await expect(page.getByRole("region", { name: "Colonne En cours" }).getByText(TASK)).toBeVisible();
+  // Glisser-déposer à la souris vers « Terminé », persisté après rechargement
+  const target = page.getByRole("region", { name: "Colonne Terminé" });
+  const from = await card.boundingBox();
+  const to = await target.boundingBox();
+  await page.mouse.move(from!.x + from!.width / 2, from!.y + 20);
+  await page.mouse.down();
+  await page.mouse.move(from!.x + from!.width / 2 + 20, from!.y + 30, { steps: 5 });
+  await page.mouse.move(to!.x + to!.width / 2, to!.y + 80, { steps: 15 });
+  await page.mouse.up();
+  await expect(target.getByText(TASK)).toBeVisible();
+  await page.waitForTimeout(800);
+  await page.reload();
+  await expect(page.getByRole("region", { name: "Colonne Terminé" }).getByText(TASK)).toBeVisible();
+  // Retour dans « En cours » au clavier (Alt + ←)
+  await page.locator(`[data-board-card]`, { hasText: TASK }).focus();
+  await page.keyboard.press("Alt+ArrowLeft");
+  await expect(page.getByRole("region", { name: "Colonne En cours" }).getByText(TASK)).toBeVisible();
+  await page.waitForTimeout(800);
   // Vue Liste synchronisée après rechargement
   await page.goto(`/projets/${projectId}`);
-  await expect(page.getByRole("region", { name: "Section En cours" }).getByText(TASK)).toBeVisible();
+  await expect(page.getByRole("list", { name: "Tâches de la section En cours" }).getByText(TASK)).toBeVisible();
 });
 
 test("9-10. Commentaire avec mention puis notification au destinataire autorisé (connexion par lien)", async ({ page }) => {

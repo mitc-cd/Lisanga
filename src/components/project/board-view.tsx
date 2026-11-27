@@ -113,24 +113,30 @@ function Column({ id, children }: { id: string; children: React.ReactNode }) {
   );
 }
 
+const PAGE = 50;
+
 export function BoardView({ board, canEdit, selectedId, onOpen }: { board: BoardApi; canEdit: boolean; selectedId: string | null; onOpen: (id: string) => void }) {
   const { project, tasks } = board.data;
   const dnd = useSectionDnd(board, project.sections, tasks);
   const dndId = useId();
   const [adding, setAdding] = useState<string | null>(null);
+  // Pagination par colonne : au-delà de PAGE cartes, « Afficher plus » (rendu rapide des gros projets).
+  const [limits, setLimits] = useState<Record<string, number>>({});
   const toggleDone = (t: TaskCard) => void board.updateTask(t.id, { status: t.status === "done" ? "todo" : "done" });
 
   return (
     <DndContext id={dndId} sensors={dnd.sensors} collisionDetection={dnd.collisionDetection} accessibility={dnd.accessibility} {...dnd.handlers}>
       <div className="flex h-full items-start gap-4 overflow-x-auto pb-6">
         {project.sections.map((s) => {
-          const ids = dnd.columns[s.id] ?? [];
+          const all = dnd.columns[s.id] ?? [];
+          const limit = limits[s.id] ?? PAGE;
+          const ids = all.length > limit ? all.slice(0, limit) : all;
           return (
             <section key={s.id} aria-label={`Colonne ${s.name}`} className="flex max-h-full w-72 shrink-0 flex-col rounded-xl bg-surface-2 p-2 sm:w-80">
               <div className="flex items-center gap-1 px-1 pb-2">
                 <SectionHeader
                   section={s}
-                  count={ids.length}
+                  count={all.length}
                   canEdit={canEdit}
                   projectId={project.id}
                   board={board}
@@ -162,6 +168,14 @@ export function BoardView({ board, canEdit, selectedId, onOpen }: { board: Board
                       ) : null;
                     })}
                     {ids.length === 0 && !adding && <p className="px-2 py-4 text-center text-xs text-muted">Déposez une tâche ici</p>}
+                    {all.length > ids.length && (
+                      <button
+                        onClick={() => setLimits((l) => ({ ...l, [s.id]: limit + PAGE }))}
+                        className="rounded-lg border border-dashed border-border-strong px-3 py-2 text-sm text-primary-text hover:bg-surface-hover"
+                      >
+                        Afficher {Math.min(PAGE, all.length - ids.length)} cartes de plus ({all.length - ids.length} restantes)
+                      </button>
+                    )}
                   </Column>
                 </SortableContext>
               </div>

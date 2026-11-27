@@ -5,6 +5,9 @@ import { getPublicSettings } from "@/server/settings";
 import { readableOn } from "@/lib/colors";
 import "./globals.css";
 
+// Application authentifiée et paramétrable sans redéploiement : aucune page n'est pré-rendue au build.
+export const dynamic = "force-dynamic";
+
 // Police téléchargée au build et servie par l'application (aucun appel à Google côté navigateur).
 const inter = Inter({ variable: "--font-inter", subsets: ["latin"], display: "swap" });
 
