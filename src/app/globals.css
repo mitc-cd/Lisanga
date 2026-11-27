@@ -1,0 +1,221 @@
+@import "tailwindcss";
+
+/*
+ * Palette MiTC — construite à partir de #0B3D91 (primaire), #589CDB (bleu clair), #F5A623 (orange).
+ * Règles de contraste (WCAG AA) :
+ *  - #F5A623 n'est JAMAIS une couleur de texte sur fond clair (1,9:1) : seulement fond + texte foncé.
+ *  - #589CDB (2,9:1 sur blanc) : décor, bordures, icônes ; pas de texte courant.
+ *  - Texte « marque » : --primary-text (#0B3D91 en clair, #8DB6F0 en sombre).
+ */
+:root {
+  --brand-900: #051d47;
+  --brand-800: #072862;
+  --brand-700: #093379;
+  --brand-600: #0b3d91;
+  --brand-500: #1f55a8;
+  --brand-400: #4d7bc6;
+  --brand-300: #7fa3dc;
+  --brand-200: #adc5eb;
+  --brand-100: #d6e2f5;
+  --brand-50: #eef3fb;
+  --sky-700: #255f96;
+  --sky-600: #2f78bd;
+  --sky-400: #589cdb;
+  --sky-100: #d5e7f7;
+  --sky-50: #eef5fc;
+  --amber-900: #5c3600;
+  --amber-700: #8a5100;
+  --amber-500: #f5a623;
+  --amber-100: #fde8c2;
+  --amber-50: #fef6e7;
+
+  --bg: #f4f6fa;
+  --surface: #ffffff;
+  --surface-2: #f8fafc;
+  --surface-hover: #eef3fb;
+  --border: #dde3ec;
+  --border-strong: #c3ccd9;
+  --text: #1a2233;
+  --text-muted: #556274;
+  --primary: var(--brand-override, #0b3d91);
+  --primary-hover: #093379;
+  --primary-fg: #ffffff;
+  --primary-text: #0b3d91;
+  --primary-soft: #eef3fb;
+  --ring: #2f78bd;
+  --accent: #f5a623;
+  --accent-fg: #1f2937;
+  --accent-soft: #fef6e7;
+  --accent-text: #8a5100;
+  --danger: #b42318;
+  --danger-soft: #fdecea;
+  --success: #1e7b34;
+  --success-soft: #e7f5ea;
+  --info-soft: #eef5fc;
+  --shadow: 0 1px 2px rgb(16 24 40 / 0.06), 0 1px 3px rgb(16 24 40 / 0.08);
+  --shadow-lg: 0 12px 32px rgb(16 24 40 / 0.16);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1320;
+    --surface: #141c2c;
+    --surface-2: #1a2336;
+    --surface-hover: #1f2b42;
+    --border: #2a364d;
+    --border-strong: #3a4862;
+    --text: #e6ebf3;
+    --text-muted: #a3afc2;
+    --primary: var(--brand-override-dark, #4d7bc6);
+    --primary-hover: #5f8bd3;
+    --primary-fg: #ffffff;
+    --primary-text: #8db6f0;
+    --primary-soft: #1b2a47;
+    --ring: #7fa3dc;
+    --accent-soft: #3a2a0c;
+    --accent-text: #f7c36b;
+    --danger: #f27b70;
+    --danger-soft: #3b1a19;
+    --success: #6fcf86;
+    --success-soft: #13301c;
+    --info-soft: #16263d;
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.4);
+    --shadow-lg: 0 12px 32px rgb(0 0 0 / 0.5);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1320;
+  --surface: #141c2c;
+  --surface-2: #1a2336;
+  --surface-hover: #1f2b42;
+  --border: #2a364d;
+  --border-strong: #3a4862;
+  --text: #e6ebf3;
+  --text-muted: #a3afc2;
+  --primary: var(--brand-override-dark, #4d7bc6);
+  --primary-hover: #5f8bd3;
+  --primary-fg: #ffffff;
+  --primary-text: #8db6f0;
+  --primary-soft: #1b2a47;
+  --ring: #7fa3dc;
+  --accent-soft: #3a2a0c;
+  --accent-text: #f7c36b;
+  --danger: #f27b70;
+  --danger-soft: #3b1a19;
+  --success: #6fcf86;
+  --success-soft: #13301c;
+  --info-soft: #16263d;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.4);
+  --shadow-lg: 0 12px 32px rgb(0 0 0 / 0.5);
+  color-scheme: dark;
+}
+
+@theme inline {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-hover: var(--surface-hover);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-fg: var(--text);
+  --color-muted: var(--text-muted);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-fg: var(--primary-fg);
+  --color-primary-text: var(--primary-text);
+  --color-primary-soft: var(--primary-soft);
+  --color-ring: var(--ring);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-text: var(--accent-text);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-info-soft: var(--info-soft);
+  --color-sky: var(--sky-400);
+  --shadow-card: var(--shadow);
+  --shadow-pop: var(--shadow-lg);
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* Focus visible net et cohérent (WCAG 2.4.7 / 2.4.11) */
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 8px;
+  z-index: 100;
+}
+.skip-link:focus {
+  left: 8px;
+  background: var(--surface);
+  color: var(--text);
+  padding: 8px 12px;
+  border-radius: 8px;
+  box-shadow: var(--shadow-lg);
+}
+
+/* Logo : pastille claire en mode sombre (bleu foncé illisible sur fond sombre) */
+.brand-logo-wrap {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 8px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .brand-logo-wrap {
+    background: #ffffff;
+    padding: 3px 8px;
+  }
+}
+:root[data-theme="dark"] .brand-logo-wrap {
+  background: #ffffff;
+  padding: 3px 8px;
+}
+
+.prose-task a {
+  color: var(--primary-text);
+  text-decoration: underline;
+}
+.prose-task ul {
+  list-style: disc;
+  padding-left: 1.25rem;
+}
+.prose-task ol {
+  list-style: decimal;
+  padding-left: 1.25rem;
+}
+.prose-task p + p,
+.prose-task ul,
+.prose-task ol {
+  margin-top: 0.5rem;
+}
+.prose-task code {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0 4px;
+  font-size: 0.9em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

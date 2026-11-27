@@ -1,0 +1,30 @@
+# Services locaux de développement : PostgreSQL + Mailpit (capture des e-mails).
+# Ports décalés pour ne pas entrer en conflit avec d'autres projets.
+name: mitc-projets
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: mitc
+      POSTGRES_PASSWORD: mitc
+      POSTGRES_DB: mitc_dev
+    ports:
+      - "54329:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./docker/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mitc -d mitc_dev"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  mailpit:
+    image: axllent/mailpit:v1.27
+    ports:
+      - "11025:1025"   # SMTP
+      - "18025:8025"   # Interface web et API
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: "1"
+      MP_SMTP_AUTH_ALLOW_INSECURE: "1"
+volumes:
+  pgdata:
