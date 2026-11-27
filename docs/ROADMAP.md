@@ -53,3 +53,6 @@ fournisseur configurable, interrupteur, quotas, contrôle des droits avant colle
 - Préférences de fuseau horaire par utilisateur (lot 1 : Africa/Kinshasa).
 - Téléversement du logo depuis l'administration (lot 1 : logo du dépôt + couleurs).
 - Temps réel (Pusher / Ably) si le polling s'avère insuffisant.
+- Vue des tâches archivées dans un projet (lot 1 : restauration via toast « Annuler », recherche ou panneau).
+- Virtualisation du tableau (lot 1 : 50 cartes par colonne + « Afficher plus »).
+- Audit d'accessibilité complet avec lecteur d'écran (NVDA / VoiceOver).

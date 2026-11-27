@@ -80,3 +80,20 @@ faute d'information sont marquées **[défaut]**.
 - **Invitation** : crée le compte au statut « invité » (assignable dès l'invitation
   si ajouté à un projet). Valable 14 jours ; le compte devient actif à la
   première connexion.
+
+## 2026-11-27 — Décisions prises pendant l'implémentation
+
+- **Rendu dynamique forcé** (`export const dynamic = "force-dynamic"` dans le layout racine) :
+  au build, `/connexion` avait été pré-rendue statiquement (base vide → redirection), ce qui
+  cassait la page en production.
+- **Sous-requêtes corrélées** : toujours via `outer("table", "colonne")` (`src/db/sql.ts`).
+  Drizzle n'écrit pas le nom de table dans une requête mono-table : `${users.id}` dans une
+  sous-requête désignait la table interne (compteurs faux). Bug trouvé et corrigé, à respecter.
+- **Vue Liste virtualisée** (`@tanstack/react-virtual`) : sans elle, 500 tâches mettaient
+  2,6 s à devenir utilisables (hydratation de ~12 000 éléments). Mesuré ensuite : affichage
+  494 ms, interaction 761 ms. **Tableau** : 50 cartes par colonne puis « Afficher plus ».
+- **Contraste mode sombre** : primaire `#3d6bb8` (5,3:1 avec texte blanc) ; bouton « danger »
+  en texte foncé (`--danger-fg`).
+- **Limitation de débit** stockée en base (table `rate_limit_events`) : fonctionne entre
+  instances serverless, purgée par le cron.
+- **Cron Vercel toutes les 15 min** (`vercel.json`) : nécessite le plan Pro (Hobby : 1/jour).

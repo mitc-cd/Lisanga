@@ -7,10 +7,10 @@ import { Popover } from "radix-ui";
 import { toast } from "sonner";
 import { Archive, ArchiveRestore, Check, ChevronRight, Link2, Plus, Tag, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Avatar, Spinner } from "@/components/ui/misc";
+import { Spinner } from "@/components/ui/misc";
 import { cn } from "@/lib/cn";
 import { fetchJson } from "@/lib/fetch-json";
-import { formatInstant, formatRelative } from "@/lib/dates";
+import { formatInstant } from "@/lib/dates";
 import { PRIORITY_LABELS, PRIORITY_ORDER, STATUS_LABELS, STATUS_ORDER, type TaskPriority, type TaskStatus } from "@/lib/labels";
 import type { LabelView, TaskDetail } from "@/server/tasks";
 import type { UpdateTaskInput } from "@/lib/validation/tasks";
@@ -535,17 +535,5 @@ function Subtasks({ task, ro, onOpenTask, refresh }: { task: TaskDetail; ro: boo
         </div>
       )}
     </section>
-  );
-}
-
-export function Byline({ name, id, date }: { name: string; id?: string; date: string }) {
-  return (
-    <span className="flex items-center gap-2 text-xs">
-      <Avatar name={name} id={id} size={20} />
-      <span className="font-semibold">{name}</span>
-      <time dateTime={date} title={formatInstant(date)} className="text-muted">
-        {formatRelative(date)}
-      </time>
-    </span>
   );
 }

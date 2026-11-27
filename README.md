@@ -1,36 +1,85 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MiTC Projets
 
-## Getting Started
+Application interne de gestion de projets de MiTC (Next.js 16, PostgreSQL, Drizzle, Better Auth).
+Documentation : `docs/` (architecture, permissions, décisions, feuille de route, couverture, avancement).
 
-First, run the development server:
+## Prérequis
+
+- Node.js 24, pnpm 8+
+- Docker (PostgreSQL 16 et Mailpit en local)
+
+## Installation locale
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
+cp .env.example .env.local
+# Renseigner les secrets (chacun : openssl rand -base64 32) :
+#   BETTER_AUTH_SECRET, SETTINGS_ENCRYPTION_KEY, CRON_SECRET
+docker compose up -d          # Postgres sur le port 54329, Mailpit (SMTP 11025, interface http://localhost:18025)
+pnpm db:migrate               # applique les migrations SQL (dossier drizzle/)
+pnpm dev                      # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Premier démarrage
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+pnpm setup:admin              # affiche un jeton à usage unique (24 h) et l'URL /installation?jeton=…
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+L'assistant crée le premier administrateur, ouvre sa session et le conduit à la configuration
+SMTP (en local : hôte `localhost`, port `11025`, chiffrement « Aucun »). Il est désactivé dès
+qu'un administrateur existe. Alternative : variable `SETUP_TOKEN` (16 caractères minimum).
 
-## Learn More
+### Données de démonstration (facultatif)
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+pnpm db:seed                  # refuse une base distante ou de production
+pnpm db:seed --reset          # vide d'abord toute la base (développement uniquement)
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Comptes fictifs : `admin@`, `chef.projet@`, `collaboratrice@`, `lecteur@demo.mitc.test`.
+Se connecter avec l'adresse ; le code arrive dans Mailpit (http://localhost:18025).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Secours : SMTP en panne
 
-## Deploy on Vercel
+```bash
+pnpm login-link admin@mitc.cd   # lien + code de connexion pour un administrateur actif, sans e-mail
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Tests
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+pnpm lint
+pnpm typecheck
+pnpm test                     # Vitest (base mitc_test, créée par docker compose) — nécessite Mailpit
+pnpm test:e2e                 # Playwright : build de production + serveur sur :3100, base mitc_test, Mailpit
+PW_DEV=1 pnpm test:e2e        # variante rapide sur serveur de dev (arrêter `pnpm dev` avant)
+pnpm build
+```
+
+Premier lancement de Playwright : `pnpm exec playwright install chromium`.
+
+## Migrations
+
+```bash
+# après modification de src/db/schema.ts
+pnpm db:generate --name=description_courte
+pnpm db:migrate
+```
+
+## Déploiement Vercel (préparé, non encore vérifié)
+
+1. Créer les bases Neon (dev, preview, production) via l'intégration Vercel.
+2. Variables d'environnement Vercel (par environnement) :
+   - `DATABASE_URL` : URL **poolée** Neon ; `DATABASE_URL_UNPOOLED` : URL directe (migrations)
+   - `APP_URL` : URL publique (ex. `https://projets.mitc.cd`)
+   - `BETTER_AUTH_SECRET`, `SETTINGS_ENCRYPTION_KEY`, `CRON_SECRET` (valeurs distinctes par environnement)
+   - `SETUP_TOKEN` (facultatif, pour l'installation ; à supprimer ensuite)
+3. Commande de build : `pnpm vercel-build` (applique les migrations puis construit).
+   ⚠️ En production, n'appliquer les migrations qu'après validation.
+4. Le cron `/api/cron` (toutes les 15 min, `vercel.json`) nécessite le plan Pro.
+5. Microsoft Entra ID : déclarer la redirection `https://<domaine>/api/auth/callback/microsoft`,
+   puis Administration → Paramètres : enregistrer, tester, activer.
+
+**Ne jamais perdre `SETTINGS_ENCRYPTION_KEY`** : sans elle, les secrets SMTP et Entra stockés
+sont illisibles (il faudra les ressaisir).

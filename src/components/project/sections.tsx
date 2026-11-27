@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/ui/dialog";
 import { cn } from "@/lib/cn";
 import type { SectionView } from "@/server/projects";
-import { createSectionAction, deleteSectionAction, renameSectionAction } from "@/app/actions/projects";
+import { createSectionAction, deleteSectionAction, moveSectionAction, renameSectionAction } from "@/app/actions/projects";
 import type { BoardApi } from "./use-board";
 
 /** Ajout rapide : Entrée crée la tâche et garde le focus pour la suivante. */
@@ -125,6 +125,35 @@ export function SectionHeader({
               <DropdownMenu.Item className="cursor-pointer rounded px-2 py-1.5 text-sm outline-none data-[highlighted]:bg-surface-hover" onSelect={() => setEditing(true)}>
                 Renommer
               </DropdownMenu.Item>
+              {(() => {
+                const all = board.data.project.sections;
+                const i = all.findIndex((x) => x.id === section.id);
+                const move = async (afterId: string | null) => {
+                  const r = await moveSectionAction(projectId, section.id, afterId);
+                  if (!r.ok) toast.error(r.error);
+                  void board.refresh();
+                };
+                return (
+                  <>
+                    {i > 0 && (
+                      <DropdownMenu.Item
+                        className="cursor-pointer rounded px-2 py-1.5 text-sm outline-none data-[highlighted]:bg-surface-hover"
+                        onSelect={() => void move(i >= 2 ? all[i - 2]!.id : null)}
+                      >
+                        Déplacer avant « {all[i - 1]!.name} »
+                      </DropdownMenu.Item>
+                    )}
+                    {i < all.length - 1 && (
+                      <DropdownMenu.Item
+                        className="cursor-pointer rounded px-2 py-1.5 text-sm outline-none data-[highlighted]:bg-surface-hover"
+                        onSelect={() => void move(all[i + 1]!.id)}
+                      >
+                        Déplacer après « {all[i + 1]!.name} »
+                      </DropdownMenu.Item>
+                    )}
+                  </>
+                );
+              })()}
               {!isLast && (
                 <DropdownMenu.Item
                   className="cursor-pointer rounded px-2 py-1.5 text-sm text-danger outline-none data-[highlighted]:bg-surface-hover"
